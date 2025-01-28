@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice and Manual Input Text Box</title>
+    <style>
+        .container {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            background-color: #4CAF50; /* Green button color */
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /* Style for the microphone icon */
+        button img {
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+        }
+
+        /* Style for the toggle switch */
+        .switch {
+            margin-left: 20px;
+            display: flex;
+            align-items: center;
+        }
+
+        .switch input {
+            margin-right: 5px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>Voice and Manual Input Text Box</h1>
+
+    <div class="container">
+        <input type="text" id="textInput" placeholder="Type or Speak here..."> 
+        <button id="micButton">
+            <img src="mic.svg" alt="Microphone"> 
+        </button>
+    </div>
+
+    <div class="switch">
+        <label for="manualInputToggle">Manual Input:</label>
+        <input type="checkbox" id="manualInputToggle" />
+    </div>
+
+    <p>Gemini can make mistakes, so double-check it.</p>
+
+    <script>
+        const micButton = document.getElementById('micButton');
+        const textInput = document.getElementById('textInput');
+        const manualInputToggle = document.getElementById('manualInputToggle');
+
+        micButton.addEventListener('click', () => {
+            // Check if manual input toggle is off (voice input enabled)
+            if (!manualInputToggle.checked) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new SpeechRecognition();
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    textInput.value = transcript;
+                };
+
+                recognition.onerror = (error) => {
+                    console.error("Speech Recognition Error:", error);
+                    textInput.value = "Error: Speech recognition failed.";
+                };
+
+                recognition.start();
+            }
+        });
+
+        // Optional: Update the text input based on manual toggle
+        manualInputToggle.addEventListener('change', () => {
+            if (manualInputToggle.checked) {
+                textInput.placeholder = "Type your text here...";
+                textInput.readOnly = false; // Allow manual text input
+            } else {
+                textInput.placeholder = "Speak here...";
+                textInput.readOnly = false; // Allow manual text input (still editable)
+            }
+        });
+    </script>
+
+</body>
+</html>

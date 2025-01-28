@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI Trainer - Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f1f1f1; /* Light grey background */
+            color: #333; /* Dark text for readability */
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.1); /* Slightly dark header */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+
+        main {
+            display: flex;
+            padding: 20px;
+        }
+
+        /* Left side container for past conversations */
+        #past-conversations {
+            width: 10%; /* 10% width for past conversations */
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.05); /* Light black for the past conversations */
+            border-radius: 10px;
+            margin-right: 20px; /* Space between past conversations and chat window */
+        }
+
+        #past-conversations h2 {
+            font-size: 1.2rem;
+        }
+
+        #past-conversations ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        #past-conversations ul li {
+            margin: 10px 0;
+        }
+
+        #past-conversations ul li a {
+            color: #4CAF50; /* Green links */
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        #past-conversations ul li a:hover {
+            color: #45a049;
+        }
+
+        /* Chat window container */
+        #chat-container {
+            width: 70%; /* 70% width for the chat window */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #chat-window {
+            background: rgba(0, 0, 0, 0.05); /* Light black for the chat window */
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            height: 300px;
+            overflow-y: auto;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        #chat-window p {
+            margin: 5px 0;
+        }
+
+        #chat-window strong {
+            color: #333;
+        }
+
+        #chat-form {
+            background: rgba(255, 255, 255, 0.8); /* Light background for the form */
+            border-radius: 10px;
+            padding: 20px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        select, input, button {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        select, input {
+            background: rgba(255, 255, 255, 0.9); /* Light input fields */
+            color: #333;
+        }
+
+        button {
+            background: #4CAF50; /* Green button */
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background: #45a049;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Scenario-Based AI Trainer</h1>
+    </header>
+    <main>
+        <!-- Left section for past conversations -->
+        <div id="past-conversations">
+            <h2>Past Conversations</h2>
+            <ul>
+                {% for conversation in conversations %}
+                    {% if conversation.id %}
+                        <li>
+                            <a href="{% url 'review_conversation' conversation.id %}">
+                                {{ conversation.scenario }} - {{ conversation.timestamp }}
+                            </a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+            
+            </ul>
+        </div>
+
+        <!-- Right section for the chat and message input -->
+        <div id="chat-container">
+            <form id="chat-form" method="post">
+                {% csrf_token %}
+                <label for="scenario">Choose a scenario:</label>
+                <select name="scenario" id="scenario">
+                    {% for scenario, description in scenarios.items %}
+                    <option value="{{ scenario }}">{{ scenario }}</option>
+                    {% endfor %}
+                </select>
+
+                <div id="chat-window">
+                    <p><strong>Chat messages will appear here...</strong></p>
+                </div>
+
+                <input type="text" name="message" id="message" placeholder="Type your message" required>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+    </main>
+    <footer>
+        <p>© 2024 AI Trainer. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        document.getElementById("chat-form").onsubmit = async function (event) {
+            event.preventDefault();
+    
+            // Get the form data
+            const formData = new FormData(event.target);
+            
+            // You can log the form data to check if it's correct
+            console.log('Form data:', formData);
+    
+            // Prepare the data to be sent to the backend
+            const requestData = {
+                scenario: formData.get('scenario'),
+                message: formData.get('message')
+            };
+    
+            // Send the data via Fetch API
+            try {
+                const response = await fetch("", {  // Ensure you put the correct endpoint here
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+    
+                // Check if the response is OK (status 200)
+                if (response.ok) {
+                    const data = await response.json();  // Assuming response is in JSON format
+                    const chatWindow = document.getElementById("chat-window");
+    
+                    // Display the messages in the chat window
+                    chatWindow.innerHTML += `<p><strong>You:</strong> ${data.user_message}</p>`;
+                    chatWindow.innerHTML += `<p><strong>AI:</strong> ${data.ai_response}</p>`;
+    
+                    // Scroll to the latest message
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+                } else {
+                    console.error('Error:', response.statusText);
+                }
+            } catch (error) {
+                console.error('Error during fetch:', error);
+            }
+        };
+    </script>
+    
+</body>
+</html>
