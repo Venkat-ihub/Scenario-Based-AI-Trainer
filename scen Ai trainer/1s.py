@@ -4,7 +4,7 @@ import json
 import os
 
 # Configure the generative AI API
-my_api_key_gemini = "AIzaSyB5YNppBGZgDl6pIxCRdfq5HOJ-Pfnvdjw"
+my_api_key_gemini = ""
 genai.configure(api_key=my_api_key_gemini)
 
 # Detailed scenario prompts
